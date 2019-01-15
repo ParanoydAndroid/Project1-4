@@ -21,18 +21,18 @@ def main():
             # We want n copies of a single (list_var * n) list because we're going to call n copies of the same iter.
             # In order to serialize n sockets.
             for words in itertools.zip_longest(*[f]*MAX_SOCKETS):
-
                 attempts = []
+
                 for w in words:
                     attempts.append(w.strip())
 
-                send_payload(server_name, server_port)
+                pool.map(send_payload, attempts)
+                print("Processing {}".format(attempts))
     else:
         print("failed to find path")
 
     print("Stopping service ...\n")
     time.sleep(10)
-    client_socket.close()
     print("Service stopped!")
 
 
@@ -45,7 +45,6 @@ def send_payload(payload):
 
     client_socket.send(payload.encode())
     client_socket.close()
-
 
 
 # def send_by_byte(output: str, s: socket):
