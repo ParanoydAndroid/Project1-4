@@ -40,7 +40,7 @@ def main():
         print("\nFailed to find path to 'passwords' file! {}\n".format(DICT_PATH))
 
     print("Stopping service ...\n")
-    time.sleep(10)
+    time.sleep(MIN_DELAY_SECS)
     print("Service stopped!\n")
 
 
