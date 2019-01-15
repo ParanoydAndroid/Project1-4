@@ -6,7 +6,7 @@ from os.path import abspath, exists
 from socket import *
 
 
-MAX_SOCKETS = 10
+MAX_SOCKETS = 5
 SERVER_NAME = '10.12.1.244'
 SERVER_PORT = 80
 
@@ -20,7 +20,8 @@ def main():
             # Yeah, this is a weird one.  zip_longest takes an unpacked list (*list_var).
             # We want n copies of a single (list_var * n) list because we're going to call n copies of the same iter.
             # In order to serialize n sockets.
-            for words in itertools.zip_longest(*[f]*MAX_SOCKETS):
+            # See https://stackoverflow.com/questions/1657299/how-do-i-read-two-lines-from-a-file-at-a-time-using-python
+            for words in itertools.zip_longest(*[f]*MAX_SOCKETS, fillvalue="fill"):
                 attempts = []
 
                 for w in words:
