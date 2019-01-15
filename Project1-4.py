@@ -16,17 +16,19 @@ DICT_PATH = "passwords"
 def main():
     pool = Threadpool(MAX_SOCKETS)
 
-    f_path = abspath("passwords")
+    f_path = abspath(DICT_PATH)
     if exists(f_path):
         with open(DICT_PATH) as f:
-            # Yeah, this is a weird one.  zip_longest takes an unpacked list (*list_var).
-            # We want n copies of a single (list_var * n) list because we're going to call n copies of the same iter.
-            # In order to serialize n sockets.
+            # Yeah, this is a weird one.  zip_longest takes an unpacked list (*list_var) and returns an iterator over it
+            # We want n copies of a single list (list_var * n) because we're going to call n copies of the same iter.
+            # So we unpack the combination of the cloned lists: zip_longest( *(list_var * n) )
+            # This enables us to serialize a single iter.
             # See https://stackoverflow.com/questions/1657299/how-do-i-read-two-lines-from-a-file-at-a-time-using-python
             for words in itertools.zip_longest(*[f]*MAX_SOCKETS, fillvalue="fill"):
                 attempts = []
 
                 for w in words:
+                    # Default fillvalue=None, which errors if we try to call None.strip(), so we change it to a str type
                     attempts.append(w.strip())
 
                 print("Processing {}".format(attempts))
