@@ -33,6 +33,7 @@ def main():
 
                 # Pool.map(function, list) spawns a thread to run function(l) for l in list.
                 pool.map(send_payload, attempts)
+
         print("\nFinished searching using dictionary file {}!\n".format(f.name))
 
     else:
